@@ -15,7 +15,7 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 - Fuzzy/semantic matching with judgment — case differences become warnings, not hard failures
 - Pass / Review needed / Rejected outcomes per label
 - Clean, accessible UI designed for non-technical users
-- Fast: typically 2–4 seconds per label using Claude claude-opus-4-5
+- Fast: typically 2–4 seconds per label using claude-opus-4-5
 
 ---
 
@@ -29,7 +29,7 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/ttb-label-verifier.git
+git clone https://github.com/phroiland/ttb-label-verifier.git
 cd ttb-label-verifier
 
 # 2. Install dependencies
@@ -79,7 +79,7 @@ src/
 **Data flow:**
 1. User uploads image(s) + fills in application data fields
 2. Frontend converts image to base64 and sends to `/api/verify`
-3. API route calls Claude claude-opus-4-5 with the image + a structured compliance prompt
+3. API route calls claude-opus-4-5 with the image + a structured compliance prompt
 4. Claude extracts each required field from the label and compares against application data
 5. Result JSON (overall status + per-field checks) is returned and rendered
 
@@ -92,7 +92,7 @@ src/
 **Approach:** Rather than building a traditional OCR + rules-engine pipeline, this prototype delegates all label reading and comparison to Claude's vision model via a single structured prompt. This matches how a human agent works — applying judgment rather than rigid pattern matching — and keeps the codebase simple and maintainable.
 
 **Tools used:**
-- [Claude claude-opus-4-5](https://www.anthropic.com/claude) (Anthropic) — vision model for label extraction and field comparison
+- [claude-opus-4-5](https://www.anthropic.com/claude) (Anthropic) — vision model for label extraction and field comparison
 - [Next.js 14](https://nextjs.org) — React framework with API routes for server-side key management
 - [TypeScript](https://www.typescriptlang.org) — type safety across frontend and backend
 - [Vercel](https://vercel.com) — deployment platform
