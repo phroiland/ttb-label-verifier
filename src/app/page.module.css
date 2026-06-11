@@ -401,3 +401,68 @@
   .summaryBar { flex-wrap: wrap; }
   .summaryBar .stat { min-width: calc(50% - 6px); }
 }
+
+/* Timing stamp */
+.timing {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Unreadable status pill */
+.pill_unreadable { background: var(--amber-light); color: var(--amber); }
+
+/* Export row */
+.exportRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.25rem;
+}
+.exportHint {
+  font-size: 12px;
+  color: var(--text3);
+}
+
+/* Warning diff visualization */
+.diffBox {
+  margin-top: 12px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+.diffTitle {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text2);
+  margin-bottom: 8px;
+}
+.diffText {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.diffSame { color: var(--text2); }
+.diffMissing {
+  color: var(--red);
+  background: var(--red-light);
+  text-decoration: line-through;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+.diffExtra {
+  color: var(--amber);
+  background: var(--amber-light);
+  border-radius: 3px;
+  padding: 0 2px;
+  font-weight: 500;
+}
+.diffLegend {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 8px;
+}

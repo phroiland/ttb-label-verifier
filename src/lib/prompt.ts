@@ -1,7 +1,7 @@
 import { AppData } from '@/types'
+import { GOVT_WARNING } from './warning-check'
 
-export const GOVT_WARNING =
-  'GOVERNMENT WARNING: (1) According to the Surgeon General, women should not drink alcoholic beverages during pregnancy because of the risk of birth defects. (2) Consumption of alcoholic beverages impairs your ability to drive a car or operate machinery, and may cause health problems.'
+export { GOVT_WARNING }
 
 export function buildVerificationPrompt(appData: AppData): string {
   return `You are a TTB (Alcohol and Tobacco Tax and Trade Bureau) label compliance checker.
@@ -17,25 +17,23 @@ APPLICATION DATA:
 - Country of Origin: ${appData.origin || '(not provided)'}
 - Beverage Type: ${appData.type}
 
-REQUIRED GOVERNMENT WARNING (must appear word-for-word, with "GOVERNMENT WARNING:" in ALL CAPS and bold):
-"${GOVT_WARNING}"
+IMAGE QUALITY GATE (check this FIRST):
+If the image is too blurry, glared, angled, dark, or low-resolution to read the label text reliably, do NOT guess. Set overallStatus to "unreadable", explain what makes it unreadable in overallSummary, and set every check's status to "missing" with labelValue null. A wrong extraction is worse than asking the agent for a better photo.
 
-INSTRUCTIONS:
-For each field, extract what is visible on the label and compare to the application data.
-
-Matching rules:
+MATCHING RULES (for all fields EXCEPT the government warning):
 - Use judgment for minor formatting differences (e.g. "STONE'S THROW" vs "Stone's Throw" = WARN, not FAIL — note it's a case difference)
-- Hard FAIL: wrong numbers (ABV, net contents off by any amount), completely different brand name, missing or materially incorrect government warning
+- Hard FAIL: wrong numbers (ABV, net contents off by any amount), completely different brand name
 - WARN: case differences, minor punctuation differences, stylistic variations that don't change meaning
 - PASS: matches exactly or with trivial whitespace differences
 - MISSING: field cannot be found on the label at all
 - If a field was not provided in the application data, mark status "pass" with note "Not specified in application"
 
-Government warning check: must be word-for-word exact (except the bold/caps requirement on "GOVERNMENT WARNING:" — that prefix MUST be all caps). Any deviation in wording = FAIL.
+GOVERNMENT WARNING — EXTRACTION ONLY, DO NOT JUDGE:
+For the "Government warning statement" check, your ONLY job is transcription. Set labelValue to the warning text EXACTLY as printed on the label — verbatim, character for character, preserving the original capitalization, punctuation, and numbering. Do not correct it, do not normalize it, do not omit anything. If no warning appears on the label, set labelValue to null. Set status to "pass" and leave note empty — the exactness judgment is performed separately by deterministic code, not by you.
 
 Respond ONLY with valid JSON, no markdown fences, no preamble, no trailing text:
 {
-  "overallStatus": "pass" | "warn" | "fail",
+  "overallStatus": "pass" | "warn" | "fail" | "unreadable",
   "overallSummary": "One sentence for the compliance agent explaining the outcome",
   "checks": [
     {

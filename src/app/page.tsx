@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useRef, useCallback, DragEvent, ChangeEvent } from 'react'
-import { AppData, LabelResult, FieldCheck, OverallStatus } from '@/types'
+import { AppData, LabelResult, FieldCheck, OverallStatus, DiffToken } from '@/types'
+import { exportCSV, exportPDF } from '@/lib/export'
 import styles from './page.module.css'
 
 const EMPTY_APP_DATA: AppData = {
@@ -30,7 +31,8 @@ async function fileToDataUrl(file: File): Promise<string> {
   })
 }
 
-async function verifyLabel(file: File, appData: AppData) {
+async function verifyLabel(file: File, appData: AppData): Promise<{ result: VerificationResultType; elapsedMs: number }> {
+  const started = performance.now()
   const imageBase64 = await fileToBase64(file)
   const res = await fetch('/api/verify', {
     method: 'POST',
@@ -39,11 +41,13 @@ async function verifyLabel(file: File, appData: AppData) {
   })
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || 'Verification failed')
-  return data.result
+  return { result: data.result, elapsedMs: Math.round(performance.now() - started) }
 }
 
+type VerificationResultType = NonNullable<LabelResult['result']>
+
 const STATUS_LABELS: Record<string, string> = {
-  pass: 'Approved', warn: 'Review needed', fail: 'Rejected', pending: 'Pending', error: 'Error',
+  pass: 'Approved', warn: 'Review needed', fail: 'Rejected', pending: 'Pending', error: 'Error', unreadable: 'Image unreadable',
 }
 
 function StatusPill({ status }: { status: string }) {
@@ -59,6 +63,37 @@ function CheckIcon({ status }: { status: string }) {
   if (status === 'warn') return <span className={`${styles.checkIcon} ${styles.warn}`}>⚠</span>
   if (status === 'missing') return <span className={`${styles.checkIcon} ${styles.fail}`}>—</span>
   return <span className={`${styles.checkIcon} ${styles.fail}`}>✗</span>
+}
+
+function WarningDiff({ diff }: { diff: DiffToken[] }) {
+  const hasDeviations = diff.some((t) => t.type !== 'same')
+  return (
+    <div className={styles.diffBox}>
+      <p className={styles.diffTitle}>
+        Word-for-word comparison vs statutory text {hasDeviations ? '— deviations highlighted' : '— exact match'}
+      </p>
+      <p className={styles.diffText}>
+        {diff.map((t, i) => (
+          <span
+            key={i}
+            className={
+              t.type === 'missing' ? styles.diffMissing
+              : t.type === 'extra' ? styles.diffExtra
+              : styles.diffSame
+            }
+            title={t.type === 'missing' ? 'Required word missing from label' : t.type === 'extra' ? 'Unexpected word on label' : undefined}
+          >
+            {t.word}{' '}
+          </span>
+        ))}
+      </p>
+      {hasDeviations && (
+        <p className={styles.diffLegend}>
+          <span className={styles.diffMissing}>struck</span> = required word missing &nbsp;·&nbsp; <span className={styles.diffExtra}>highlighted</span> = unexpected word on label
+        </p>
+      )}
+    </div>
+  )
 }
 
 function ResultCard({ item, defaultOpen }: { item: LabelResult; defaultOpen?: boolean }) {
@@ -83,6 +118,9 @@ function ResultCard({ item, defaultOpen }: { item: LabelResult; defaultOpen?: bo
           </span>
         </div>
         <StatusPill status={status} />
+        {item.elapsedMs != null && (
+          <span className={styles.timing} title="Total verification time">{(item.elapsedMs / 1000).toFixed(1)}s</span>
+        )}
         <span className={`${styles.chevron} ${open ? styles.chevronOpen : ''}`} aria-hidden>▾</span>
       </button>
 
@@ -116,6 +154,9 @@ function ResultCard({ item, defaultOpen }: { item: LabelResult; defaultOpen?: bo
               ))}
             </tbody>
           </table>
+          {item.result.warningDiff && item.result.warningDiff.length > 0 && (
+            <WarningDiff diff={item.result.warningDiff} />
+          )}
         </div>
       )}
 
@@ -257,8 +298,8 @@ export default function Page() {
     setSingleLoading(true)
     setSingleError('')
     try {
-      const result = await verifyLabel(singleFile, singleData)
-      const lr: LabelResult = { id: newId(), filename: singleFile.name, imgSrc: singleImgSrc, appData: singleData, result }
+      const { result, elapsedMs } = await verifyLabel(singleFile, singleData)
+      const lr: LabelResult = { id: newId(), filename: singleFile.name, imgSrc: singleImgSrc, appData: singleData, result, elapsedMs }
       pushResult(lr)
       setTab('results')
     } catch (e) {
@@ -287,8 +328,8 @@ export default function Page() {
     const tasks = batchFiles.map((file, i) => async () => {
       setBatchProgress((p) => ({ ...p, [i]: 'loading' }))
       try {
-        const result = await verifyLabel(file, batchData)
-        const lr: LabelResult = { id: newId(), filename: file.name, imgSrc: batchThumbs[i] ?? '', appData: batchData, result }
+        const { result, elapsedMs } = await verifyLabel(file, batchData)
+        const lr: LabelResult = { id: newId(), filename: file.name, imgSrc: batchThumbs[i] ?? '', appData: batchData, result, elapsedMs }
         pushResult(lr)
         setBatchProgress((p) => ({ ...p, [i]: 'done' }))
       } catch {
@@ -450,7 +491,7 @@ export default function Page() {
                 {[
                   { label: 'Total', value: results.length, cls: '' },
                   { label: 'Approved', value: counts.pass ?? 0, cls: styles.numPass },
-                  { label: 'Review needed', value: counts.warn ?? 0, cls: styles.numWarn },
+                  { label: 'Review needed', value: (counts.warn ?? 0) + (counts.unreadable ?? 0), cls: styles.numWarn },
                   { label: 'Rejected', value: counts.fail ?? 0, cls: styles.numFail },
                 ].map((s) => (
                   <div key={s.label} className={styles.stat}>
@@ -458,6 +499,16 @@ export default function Page() {
                     <span className={styles.statLabel}>{s.label}</span>
                   </div>
                 ))}
+              </div>
+
+              <div className={styles.exportRow}>
+                <button className={styles.btn} onClick={() => exportCSV(results)}>
+                  ⬇ Export CSV
+                </button>
+                <button className={styles.btn} onClick={() => exportPDF(results)}>
+                  ⬇ Export PDF report
+                </button>
+                <span className={styles.exportHint}>For case files and audit records</span>
               </div>
 
               <div className={styles.resultsList}>
