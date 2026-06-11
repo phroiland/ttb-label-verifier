@@ -87,6 +87,25 @@ src/
 
 ---
 
+## Approach, tools, and assumptions
+
+**Approach:** Rather than building a traditional OCR + rules-engine pipeline, this prototype delegates all label reading and comparison to Claude's vision model via a single structured prompt. This matches how a human agent works — applying judgment rather than rigid pattern matching — and keeps the codebase simple and maintainable.
+
+**Tools used:**
+- [Claude claude-opus-4-5](https://www.anthropic.com/claude) (Anthropic) — vision model for label extraction and field comparison
+- [Next.js 14](https://nextjs.org) — React framework with API routes for server-side key management
+- [TypeScript](https://www.typescriptlang.org) — type safety across frontend and backend
+- [Vercel](https://vercel.com) — deployment platform
+
+**Assumptions made:**
+- Label images are provided as uploads (not fetched from URLs), consistent with an agent's local workflow
+- Batch mode uses shared application data across all labels; per-label data would require a CSV import feature (noted as future work)
+- The government warning text is fixed to the current statutory requirement hardcoded in `src/lib/prompt.ts`
+- This is a standalone prototype — no integration with the live COLA system, which would require TTB authorization
+- No authentication is implemented; a production deployment would require an auth layer
+
+---
+
 ## Technical decisions & trade-offs
 
 **Why Next.js?** API routes give us a server-side proxy so the API key never leaves the server — critical for any real deployment. The framework also makes Vercel deployment trivial.
