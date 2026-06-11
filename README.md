@@ -2,6 +2,8 @@
 
 AI-powered alcohol label compliance verification for TTB (Alcohol and Tobacco Tax and Trade Bureau) compliance agents.
 
+**Live demo:** https://ttb-label-verifier-pi.vercel.app
+
 ## What it does
 
 Upload a label image and enter application data (brand name, ABV, net contents, etc.) — the app uses Claude's vision to extract what's actually on the label and compare it against the COLA application, flagging any discrepancies.
