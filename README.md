@@ -6,13 +6,29 @@ AI-powered alcohol label compliance verification for TTB (Alcohol and Tobacco Ta
 
 ## Screenshots
 
-| Verification form | Deterministic warning diff |
-|---|---|
-| ![Verification form](docs/ttb-screenshot-form.png) | ![Warning diff catching modified statutory text](docs/ttb-screenshot-diff.png) |
+**Verification form**
 
-| Batch upload | Batch results |
-|---|---|
-| ![Batch upload](docs/ttb-screenshot-batch.png) | ![Batch results](docs/ttb-screenshot-batch2.png) |
+![Verification form](docs/ttb-screenshot-form.png)
+
+**Deterministic warning diff**
+
+![Warning diff catching modified statutory text](docs/ttb-screenshot-diff.png)
+
+**Batch upload**
+
+![Batch upload](docs/ttb-screenshot-batch.png)
+
+**Batch results**
+
+![Batch results](docs/ttb-screenshot-batch2.png)
+
+**Applicant pre-check**
+
+![Applicant pre-check with fix guidance](docs/ttb-screenshot-precheck.png)
+
+**Applicant pre-check result**
+
+![Pre-check result with verdict, warning diff, and fix guidance](docs/ttb-screenshot-precheck-result.png)
 
 ## What it does
 
@@ -21,6 +37,7 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 **Key features:**
 
 - Single label verification with full field-by-field breakdown
+- **Applicant pre-check mode** (`/precheck`) — the same verification engine reframed as a pre-submission screening tool for distilleries and importers, with coaching-style output, a copy-paste block for the required warning text, and explicit advisory disclaimers. Every error caught before submission is a rejection cycle TTB never processes.
 - Batch upload — up to 300 labels processed concurrently (5 at a time), with optional per-label application data via CSV import
 - **Deterministic government warning check** — the AI transcribes the warning verbatim; exactness is judged by code with a word-level diff against the statutory text (27 CFR Part 16), rendered visually so agents see exactly which words deviate
 - Fuzzy/semantic matching with judgment for other fields — case differences become warnings, not hard failures
@@ -30,6 +47,7 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 - Pass / Review needed / Rejected / Unreadable outcomes per label
 - **Per-label error handling** — if a single API call fails (rate limit, network), that label appears in Results with its error message rather than silently vanishing from a batch run; a dedicated "Errors" count appears in the summary bar only when relevant
 - Clean, accessible UI designed for non-technical users — USWDS-inspired federal styling with an explicit unofficial-prototype banner
+- **API hardening** — per-IP rate limiting and request size caps on the verification endpoint (in-memory for the prototype; a production deployment would use a durable store like Redis)
 
 ## Requirements traceability
 
@@ -176,6 +194,7 @@ test-labels/           # Generated test suite + expected-results matrix
 - Field checklist is currently uniform across beverage types; TTB requirements vary by category (e.g. sulfite declarations for wine). A production version would branch the verification checklist on the "Beverage Type" field.
 - Integration with COLA system (requires TTB authorization — out of scope for prototype)
 - Authentication layer before any production deployment
+- Rate limiting is in-memory per serverless instance (best-effort); production would require a durable store and authentication
 
 ## Tests
 

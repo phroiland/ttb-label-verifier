@@ -6,9 +6,39 @@ import { AppData, VerificationResult, FieldCheck, OverallStatus } from '@/types'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
+// ── Rate limiting ─────────────────────────────────────────────────────────────
+// Lightweight in-memory, per-IP sliding window. Note: serverless instances each
+// hold their own map, so this is best-effort protection for a prototype — a
+// production deployment would use a durable store (e.g. Redis/Upstash).
+const RATE_LIMIT = 30 // max requests…
+const WINDOW_MS = 10 * 60 * 1000 // …per 10 minutes per IP
+const hits = new Map<string, number[]>()
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now()
+  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS)
+  if (recent.length >= RATE_LIMIT) {
+    hits.set(ip, recent)
+    return true
+  }
+  recent.push(now)
+  hits.set(ip, recent)
+  return false
+}
+
+const MAX_IMAGE_BASE64_CHARS = 10_000_000 // ~7.5 MB binary
+
 export async function POST(req: NextRequest) {
   const started = Date.now()
   try {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+    if (isRateLimited(ip)) {
+      return NextResponse.json(
+        { error: 'Too many requests — please wait a few minutes and try again.' },
+        { status: 429 },
+      )
+    }
+
     const body = await req.json()
     const { imageBase64, mediaType, appData } = body as {
       imageBase64: string
@@ -18,6 +48,13 @@ export async function POST(req: NextRequest) {
 
     if (!imageBase64 || !mediaType || !appData) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    if (imageBase64.length > MAX_IMAGE_BASE64_CHARS) {
+      return NextResponse.json(
+        { error: 'Image too large — please use an image under ~7 MB.' },
+        { status: 413 },
+      )
     }
 
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']

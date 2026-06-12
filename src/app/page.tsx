@@ -398,6 +398,11 @@ export default function Page() {
         <p className={styles.headerSub}>
           Compare uploaded label artwork against COLA application data. Results are advisory and support, not replace, agent review.
         </p>
+        <p style={{ marginTop: 8, fontSize: 13 }}>
+          <a href="/precheck" style={{ color: 'var(--blue)', textDecoration: 'underline', fontWeight: 600 }}>
+            Applicant? Pre-check your label before applying →
+          </a>
+        </p>
       </header>
 
       <nav className={styles.tabs} role="tablist">
