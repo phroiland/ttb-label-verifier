@@ -4,6 +4,16 @@ AI-powered alcohol label compliance verification for TTB (Alcohol and Tobacco Ta
 
 **Live demo:** https://ttb-label-verifier-pi.vercel.app
 
+## Screenshots
+
+| Verification form | Deterministic warning diff |
+|---|---|
+| ![Verification form](docs/ttb-screenshot-form.png) | ![Warning diff catching modified statutory text](docs/ttb-screenshot-diff.png) |
+
+| Batch upload | Batch results |
+|---|---|
+| ![Batch upload](docs/ttb-screenshot-batch.png) | ![Batch results](docs/ttb-screenshot-batch2.png) |
+
 ## What it does
 
 Upload a label image and enter application data (brand name, ABV, net contents, etc.) — the app uses Claude's vision to extract what's actually on the label and compare it against the COLA application, flagging any discrepancies.
@@ -11,7 +21,7 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 **Key features:**
 
 - Single label verification with full field-by-field breakdown
-- Batch upload — up to 300 labels processed concurrently (5 at a time)
+- Batch upload — up to 300 labels processed concurrently (5 at a time), with optional per-label application data via CSV import
 - **Deterministic government warning check** — the AI transcribes the warning verbatim; exactness is judged by code with a word-level diff against the statutory text (27 CFR Part 16), rendered visually so agents see exactly which words deviate
 - Fuzzy/semantic matching with judgment for other fields — case differences become warnings, not hard failures
 - **Image quality gate** — blurry, glared, or angled photos return "Image unreadable" instead of a guessed extraction
@@ -139,7 +149,7 @@ test-labels/           # Generated test suite + expected-results matrix
 **Assumptions made:**
 
 - Label images are provided as uploads (not fetched from URLs), consistent with an agent's local workflow
-- Batch mode uses shared application data across all labels; per-label data would require a CSV import feature (noted as future work)
+- Batch mode applies shared default application data, with per-label overrides available via CSV import (`test-labels/application-data.csv` is a working sample)
 - The government warning text is fixed to the current statutory requirement in `src/lib/warning-check.ts`
 - Bold-type detection for the warning prefix is out of scope (capitalization is checked; reliable bold detection from arbitrary photos requires typography analysis beyond a prototype)
 - This is a standalone prototype — no integration with the live COLA system, which would require TTB authorization
@@ -159,11 +169,23 @@ test-labels/           # Generated test suite + expected-results matrix
 
 **Known limitations / future work:**
 
-- Per-label application data in batch mode (currently uses shared defaults)
-- CSV import for batch application data
 - Bold-type detection on the warning prefix
 - Integration with COLA system (requires TTB authorization — out of scope for prototype)
 - Authentication layer before any production deployment
+
+## Tests
+
+The deterministic compliance logic is covered by a unit test suite (`vitest`):
+
+```bash
+npm test
+```
+
+17 tests cover the statutory warning checker (exact match, OCR whitespace tolerance, title-case prefix rejection, word-level deviation detection, truncation, absence, all-caps body acceptance) and the CSV import parser (header aliases, quoted fields, blank cells, duplicate and missing filenames, default merging). The warning checker tests encode the same scenarios as the visual test-label suite — the rules are verified in code, not just demonstrated by example.
+
+## Accessibility (Section 508)
+
+Federal software is bound by Section 508. Within prototype scope: the app is fully keyboard-navigable (drop zones are focusable buttons with Enter activation), focus states use a high-visibility gold ring per USWDS convention, all form fields have associated labels, status is conveyed by text labels rather than color alone, decorative icons are `aria-hidden` with text alternatives present, and the layout is semantic HTML (`header`/`main`/`footer`, ARIA tab roles). A production deployment would add a formal audit (e.g. axe + manual screen-reader passes) to the compliance checklist.
 
 ## Questions?
 

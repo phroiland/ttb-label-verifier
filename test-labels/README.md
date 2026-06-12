@@ -33,3 +33,7 @@ For test 6, the application data is: brand `Silver Thistle Distilling Co.`, clas
 ## Why synthetic labels
 
 Generated labels give deterministic, legible text with known ground truth — every deviation is intentional and documented. Real COLA labels from [TTB's public registry](https://ttbonline.gov/colasonline) work too and were used in exploratory testing, but can't be redistributed in this repo with the same confidence about expected outcomes.
+
+## Batch CSV sample
+
+`application-data.csv` in this folder is a working per-label data file for batch mode: upload all seven labels plus this CSV on the Batch tab, and each label gets its own correct application data (including the gin's different brand/ABV/size). Expected batch outcome: 2 approved, 1 review needed, 3 rejected, 1 unreadable.

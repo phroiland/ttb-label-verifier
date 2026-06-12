@@ -1,0 +1,8 @@
+filename,brand,class_type,abv,net_contents,producer,origin,beverage_type
+01-pass-clean.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Lawrenceburg, Kentucky, USA",USA,distilled spirits
+02-fail-titlecase-warning.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Lawrenceburg, Kentucky, USA",USA,distilled spirits
+03-fail-modified-warning.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Lawrenceburg, Kentucky, USA",USA,distilled spirits
+04-fail-missing-warning.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Lawrenceburg, Kentucky, USA",USA,distilled spirits
+05-warn-brand-case.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Lawrenceburg, Kentucky, USA",USA,distilled spirits
+06-gin-silver-thistle.png,Silver Thistle Distilling Co.,London Dry Gin,42% Alc./Vol.,700 mL,"Silver Thistle Distilling Co., London, England",England,distilled spirits
+07-unreadable-blurry.png,OLD TOM DISTILLERY,Kentucky Straight Bourbon Whiskey,45% Alc./Vol. (90 Proof),750 mL,"Old Tom Distillery, Lawrenceburg, Kentucky, USA",USA,distilled spirits

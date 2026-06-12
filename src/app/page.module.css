@@ -488,3 +488,52 @@
   color: var(--text3);
   margin-top: 8px;
 }
+
+/* CSV import section */
+.csvSection {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+.csvTitle {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.csvHelp {
+  font-size: 12px;
+  color: var(--text2);
+  margin-bottom: 10px;
+  max-width: 70ch;
+}
+.csvHelp code {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0 4px;
+  font-size: 11px;
+}
+.csvButton {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 700;
+  border: 2px solid var(--border2);
+  background: var(--surface);
+  color: var(--blue);
+  cursor: pointer;
+}
+.csvButton:hover { background: var(--surface2); }
+.csvInfo {
+  font-size: 12px;
+  color: var(--green);
+  margin-top: 8px;
+  font-weight: 600;
+}
+.csvWarn {
+  font-size: 12px;
+  color: var(--amber);
+  margin-top: 4px;
+}

@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, DragEvent, ChangeEvent } from 'react'
 import { AppData, LabelResult, FieldCheck, OverallStatus, DiffToken } from '@/types'
 import { exportCSV, exportPDF } from '@/lib/export'
+import { parseApplicationCsv, mergeAppData } from '@/lib/csv-import'
 import styles from './page.module.css'
 
 const EMPTY_APP_DATA: AppData = {
@@ -276,6 +277,9 @@ export default function Page() {
   const [batchData, setBatchData] = useState<AppData>(EMPTY_APP_DATA)
   const [batchProgress, setBatchProgress] = useState<Record<number, 'pending'|'loading'|'done'|'error'>>({})
   const [batchRunning, setBatchRunning] = useState(false)
+  const [csvRows, setCsvRows] = useState<Map<string, Partial<AppData>> | null>(null)
+  const [csvInfo, setCsvInfo] = useState<string>('')
+  const [csvErrors, setCsvErrors] = useState<string[]>([])
 
   // Results
   const [results, setResults] = useState<LabelResult[]>([])
@@ -321,15 +325,34 @@ export default function Page() {
     setBatchThumbs(thumbs)
   }, [])
 
+  const handleCsvUpload = useCallback(async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const text = await file.text()
+    const { rows, errors } = parseApplicationCsv(text)
+    if (rows.size === 0) {
+      setCsvRows(null)
+      setCsvInfo('')
+      setCsvErrors(errors.length ? errors : ['No data rows found in CSV.'])
+      return
+    }
+    setCsvRows(rows)
+    setCsvErrors(errors)
+    const matched = batchFiles.filter((f) => rows.has(f.name.toLowerCase())).length
+    setCsvInfo(`${file.name}: ${rows.size} row${rows.size !== 1 ? 's' : ''} loaded${batchFiles.length ? `, ${matched} of ${batchFiles.length} uploaded labels matched` : ''}.`)
+  }, [batchFiles])
+
   const handleVerifyBatch = useCallback(async () => {
     if (!batchFiles.length) return
     setBatchRunning(true)
     const concurrency = 5
     const tasks = batchFiles.map((file, i) => async () => {
       setBatchProgress((p) => ({ ...p, [i]: 'loading' }))
+      const appData = mergeAppData(batchData, csvRows?.get(file.name.toLowerCase()))
       try {
-        const { result, elapsedMs } = await verifyLabel(file, batchData)
-        const lr: LabelResult = { id: newId(), filename: file.name, imgSrc: batchThumbs[i] ?? '', appData: batchData, result, elapsedMs }
+        const { result, elapsedMs } = await verifyLabel(file, appData)
+        const lr: LabelResult = { id: newId(), filename: file.name, imgSrc: batchThumbs[i] ?? '', appData, result, elapsedMs }
         pushResult(lr)
         setBatchProgress((p) => ({ ...p, [i]: 'done' }))
       } catch {
@@ -343,7 +366,7 @@ export default function Page() {
     await Promise.all(Array.from({ length: Math.min(concurrency, tasks.length) }, worker))
     setBatchRunning(false)
     setTab('results')
-  }, [batchFiles, batchData, batchThumbs, pushResult])
+  }, [batchFiles, batchData, batchThumbs, csvRows, pushResult])
 
   // Stats
   const counts = results.reduce(
@@ -466,6 +489,21 @@ export default function Page() {
                   Default application data — applied to all labels
                 </p>
                 <AppDataForm prefix="b" data={batchData} onChange={setBatchData} />
+
+                <div className={styles.csvSection}>
+                  <p className={styles.csvTitle}>Per-label application data (optional)</p>
+                  <p className={styles.csvHelp}>
+                    Upload a CSV with a <code>filename</code> column plus any of: <code>brand</code>, <code>class_type</code>, <code>abv</code>, <code>net_contents</code>, <code>producer</code>, <code>origin</code>, <code>beverage_type</code>. Matched rows override the defaults above for that label.
+                  </p>
+                  <label className={styles.csvButton}>
+                    Choose CSV file
+                    <input type="file" accept=".csv,text/csv" onChange={handleCsvUpload} style={{ display: 'none' }} />
+                  </label>
+                  {csvInfo && <p className={styles.csvInfo}>{csvInfo}</p>}
+                  {csvErrors.map((err, i) => (
+                    <p key={i} className={styles.csvWarn}>{err}</p>
+                  ))}
+                </div>
               </>
             )}
 
