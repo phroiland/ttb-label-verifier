@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     const message = await client.messages.create({
-      model: 'claude-opus-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 1500,
       messages: [
         {
@@ -60,7 +60,14 @@ export async function POST(req: NextRequest) {
     // ── Deterministic government warning check ──────────────────────────────
     // The model only TRANSCRIBES the warning; exactness is judged here in code.
     // Skipped if the image was unreadable.
-    if (result.overallStatus !== 'unreadable') {
+    if (result.overallStatus === 'unreadable') {
+      // Normalize: an unreadable image yields no verdict on any field
+      result.checks.forEach((c) => {
+        c.status = 'missing'
+        c.labelValue = null
+        if (!c.note) c.note = 'Image quality insufficient to extract this field'
+      })
+    } else {
       const warningCheck = result.checks.find((c) =>
         c.field.toLowerCase().includes('warning'),
       )

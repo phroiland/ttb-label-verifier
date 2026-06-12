@@ -25,7 +25,7 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 - **Deterministic government warning check** — the AI transcribes the warning verbatim; exactness is judged by code with a word-level diff against the statutory text (27 CFR Part 16), rendered visually so agents see exactly which words deviate
 - Fuzzy/semantic matching with judgment for other fields — case differences become warnings, not hard failures
 - **Image quality gate** — blurry, glared, or angled photos return "Image unreadable" instead of a guessed extraction
-- **Per-label timing** displayed on every result (target: under 5 seconds)
+- **Per-label timing** displayed on every result — model selection (claude-sonnet-4-6) is tuned to the 5-second requirement; the deterministic warning layer is what makes the faster, cheaper model safe to use
 - **CSV export and PDF audit report** — one page per label with thumbnail, field table, and status, for case files and document retention
 - Pass / Review needed / Rejected / Unreadable outcomes per label
 - Clean, accessible UI designed for non-technical users — USWDS-inspired federal styling with an explicit unofficial-prototype banner
@@ -126,7 +126,7 @@ test-labels/           # Generated test suite + expected-results matrix
 
 1. User uploads image(s) + fills in application data fields
 2. Frontend converts image to base64 and sends to `/api/verify`
-3. API route calls claude-opus-4-5 with the image + a structured compliance prompt
+3. API route calls claude-sonnet-4-6 with the image + a structured compliance prompt
 4. Claude extracts each field; for the government warning it transcribes verbatim only
 5. Server code runs the deterministic warning comparison, computes the word diff, and recomputes the overall status
 6. Result JSON (overall status + per-field checks + warning diff + timing) is returned and rendered
@@ -139,7 +139,7 @@ test-labels/           # Generated test suite + expected-results matrix
 
 **Tools used:**
 
-- claude-opus-4-5 (Anthropic) — vision model for label extraction and semantic field comparison
+- claude-sonnet-4-6 (Anthropic) — vision model for label extraction and semantic field comparison
 - Next.js 14 — React framework with API routes for server-side key management
 - TypeScript — type safety across frontend and backend
 - jsPDF — client-side PDF report generation
