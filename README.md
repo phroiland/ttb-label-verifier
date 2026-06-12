@@ -18,7 +18,7 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 - **Per-label timing** displayed on every result (target: under 5 seconds)
 - **CSV export and PDF audit report** — one page per label with thumbnail, field table, and status, for case files and document retention
 - Pass / Review needed / Rejected / Unreadable outcomes per label
-- Clean, accessible UI designed for non-technical users
+- Clean, accessible UI designed for non-technical users — USWDS-inspired federal styling with an explicit unofficial-prototype banner
 
 ## Requirements traceability
 

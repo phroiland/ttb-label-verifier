@@ -1,53 +1,47 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* USWDS federal palette — light-only by design, like actual .gov properties */
 :root {
-  --bg: #f5f5f3;
-  --surface: #ffffff;
-  --surface2: #f7f7f5;
-  --border: #e2e2df;
-  --border2: #d0d0cc;
-  --text: #111110;
-  --text2: #6b6b68;
-  --text3: #9b9b98;
-  --blue: #185FA5;
-  --blue-light: #E6F1FB;
-  --blue-dark: #0C447C;
-  --green: #3B6D11;
-  --green-light: #EAF3DE;
-  --amber: #854F0B;
-  --amber-light: #FAEEDA;
-  --red: #A32D2D;
-  --red-light: #FCEBEB;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-}
+  color-scheme: light;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1a1a18;
-    --surface: #242422;
-    --surface2: #2e2e2c;
-    --border: #3a3a38;
-    --border2: #4a4a48;
-    --text: #f0f0ee;
-    --text2: #9b9b98;
-    --text3: #6b6b68;
-    --blue-light: #0c2840;
-    --green-light: #1a2e0a;
-    --amber-light: #2e1e04;
-    --red-light: #2e1010;
-  }
+  --bg: #f0f0f0;          /* base-lightest: page canvas */
+  --surface: #ffffff;     /* cards */
+  --surface2: #f0f0f0;    /* inputs, subdued fills */
+  --border: #dfe1e2;
+  --border2: #a9aeb1;
+  --text: #1b1b1b;
+  --text2: #565c65;
+  --text3: #71767a;
+
+  --blue: #005ea2;        /* USWDS primary */
+  --blue-light: #d9e8f6;
+  --blue-dark: #1a4480;
+  --navy: #162e51;
+
+  --green: #008817;
+  --green-light: #ecf3ec;
+  --amber: #5c4809;
+  --amber-light: #faf3d1;
+  --gold: #ffbe2e;
+  --red: #b50909;
+  --red-light: #f4e3db;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
 }
 
 html { font-size: 16px; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  font-family: var(--font-public-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
+main { flex: 1; }
 
 .sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0;
@@ -56,3 +50,90 @@ body {
 
 button { font-family: inherit; cursor: pointer; }
 input, select, textarea { font-family: inherit; }
+
+/* ── Unofficial-prototype banner ───────────────────────────────────────── */
+.gov-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #1b1b1b;
+  color: #dfe1e2;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 7px 16px;
+}
+.gov-banner strong { color: #ffffff; font-weight: 700; }
+.gov-banner-flag {
+  flex-shrink: 0;
+  width: 16px;
+  height: 11px;
+  background: var(--gold);
+  display: inline-block;
+}
+
+/* ── Masthead ──────────────────────────────────────────────────────────── */
+.masthead {
+  background: var(--navy);
+  color: #ffffff;
+  padding: 22px 0;
+  border-bottom: 4px solid var(--gold);
+}
+.masthead-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.masthead-seal {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  outline: 1px solid rgba(255, 255, 255, 0.35);
+  outline-offset: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+.masthead-kicker {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #8ba6ca;
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+.masthead-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.2px;
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+.site-footer {
+  background: var(--navy);
+  color: #b9c5d6;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 4rem;
+  border-top: 4px solid var(--gold);
+}
+.site-footer-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 20px 1.5rem;
+}
+.site-footer-inner p + p { margin-top: 6px; }
+.site-footer a {
+  color: #ffffff;
+  text-decoration: underline;
+}

@@ -361,10 +361,10 @@ export default function Page() {
       <h1 className="sr-only">TTB Label Verifier</h1>
 
       <header className={styles.header}>
-        <div>
-          <h2 className={styles.headerTitle}>Label Verification</h2>
-          <p className={styles.headerSub}>AI-powered TTB compliance checking</p>
-        </div>
+        <h2 className={styles.headerTitle}>Verify a label application</h2>
+        <p className={styles.headerSub}>
+          Compare uploaded label artwork against COLA application data. Results are advisory and support, not replace, agent review.
+        </p>
       </header>
 
       <nav className={styles.tabs} role="tablist">
@@ -389,7 +389,13 @@ export default function Page() {
         <section aria-label="Single label verification">
           <div className={styles.card}>
             <DropZone id="file-single" onFiles={handleSingleFiles}>
-              <div className={styles.dropIcon}>🏷️</div>
+              <div className={styles.dropIcon} aria-hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </div>
               <strong>Drop label image here</strong>
               <p>or click to choose — JPG, PNG, WEBP</p>
             </DropZone>
@@ -425,7 +431,14 @@ export default function Page() {
         <section aria-label="Batch label verification">
           <div className={styles.card}>
             <DropZone id="file-batch" onFiles={handleBatchFiles} multiple>
-              <div className={styles.dropIcon}>📦</div>
+              <div className={styles.dropIcon} aria-hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" />
+                  <line x1="9" y1="12" x2="15" y2="12" />
+                  <line x1="9" y1="16" x2="15" y2="16" />
+                </svg>
+              </div>
               <strong>Drop multiple label images here</strong>
               <p>or click to choose — up to 300 labels at once</p>
             </DropZone>
@@ -479,9 +492,16 @@ export default function Page() {
       {/* Results tab */}
       {tab === 'results' && (
         <section aria-label="Verification results">
+          <div className={styles.card}>
           {results.length === 0 ? (
             <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>📋</div>
+              <div className={styles.emptyIcon} aria-hidden>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                  <rect x="8" y="2" width="8" height="4" rx="1" />
+                  <path d="M9 13l2 2 4-4" />
+                </svg>
+              </div>
               <h3>No results yet</h3>
               <p>Verify a label from the single or batch tab</p>
             </div>
@@ -518,6 +538,7 @@ export default function Page() {
               </div>
             </>
           )}
+          </div>
         </section>
       )}
     </div>
