@@ -6,29 +6,11 @@ AI-powered alcohol label compliance verification for TTB (Alcohol and Tobacco Ta
 
 ## Screenshots
 
-**Verification form**
+<img src="docs/ttb-screenshot-form.png" alt="Verification form" width="420"> <img src="docs/ttb-screenshot-diff.png" alt="Deterministic warning diff" width="420">
 
-![Verification form](docs/ttb-screenshot-form.png)
+<img src="docs/ttb-screenshot-batch.png" alt="Batch upload" width="420"> <img src="docs/ttb-screenshot-batch2.png" alt="Batch results" width="420">
 
-**Deterministic warning diff**
-
-![Warning diff catching modified statutory text](docs/ttb-screenshot-diff.png)
-
-**Batch upload**
-
-![Batch upload](docs/ttb-screenshot-batch.png)
-
-**Batch results**
-
-![Batch results](docs/ttb-screenshot-batch2.png)
-
-**Applicant pre-check**
-
-![Applicant pre-check with fix guidance](docs/ttb-screenshot-precheck.png)
-
-**Applicant pre-check result**
-
-![Pre-check result with verdict, warning diff, and fix guidance](docs/ttb-screenshot-precheck-result.png)
+<img src="docs/ttb-screenshot-precheck.png" alt="Applicant pre-check form" width="420"> <img src="docs/ttb-screenshot-precheck-result.png" alt="Pre-check result with fix guidance" width="420">
 
 ## What it does
 
