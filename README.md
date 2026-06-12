@@ -28,6 +28,7 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 - **Per-label timing** displayed on every result — model selection (claude-sonnet-4-6) is tuned to the 5-second requirement; the deterministic warning layer is what makes the faster, cheaper model safe to use
 - **CSV export and PDF audit report** — one page per label with thumbnail, field table, and status, for case files and document retention
 - Pass / Review needed / Rejected / Unreadable outcomes per label
+- **Per-label error handling** — if a single API call fails (rate limit, network), that label appears in Results with its error message rather than silently vanishing from a batch run; a dedicated "Errors" count appears in the summary bar only when relevant
 - Clean, accessible UI designed for non-technical users — USWDS-inspired federal styling with an explicit unofficial-prototype banner
 
 ## Requirements traceability
@@ -164,8 +165,6 @@ test-labels/           # Generated test suite + expected-results matrix
 **Concurrency = 5 for batch.** Balances throughput vs. Anthropic rate limits. Agents processing 300 labels will see all results within ~2–3 minutes, with each individual label staying within the 5-second window. Easily tunable.
 
 **Fuzzy matching is Claude's job — except the warning.** For most fields the prompt instructs the model to apply judgment, the same way a human agent does. The government warning is the exception: extraction by AI, judgment by code (see above).
-
-**Model choice: Haiku over Sonnet.** Testing across the full test-label suite found `claude-haiku-4-5` keeps verification under the 5-second target (vs. 6-13s with Sonnet) at acceptable accuracy cost: in one case (`05-warn-brand-case.png`), Haiku approved a label with a minor brand-name formatting difference ("Old Tom's Distillery" vs. "OLD TOM DISTILLERY") that Sonnet correctly flagged for review. This is a real trade-off, but a bounded one — it affects only the "review needed" tier for cosmetic discrepancies, never a hard pass/fail. The field with zero tolerance, the government warning, is checked by deterministic code regardless of which vision model extracts the text, so the compliance-critical path is unaffected by this choice. If stricter fuzzy-matching on minor formatting differences becomes a priority over latency, swapping back to `claude-sonnet-4-6` in `src/app/api/verify/route.ts` is a one-line change.
 
 **Client-side exports.** CSV and PDF are generated entirely in the browser — no server storage, no retention surface, and the export works even if the agent is offline after verification.
 

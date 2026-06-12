@@ -355,7 +355,16 @@ export default function Page() {
         const lr: LabelResult = { id: newId(), filename: file.name, imgSrc: batchThumbs[i] ?? '', appData, result, elapsedMs }
         pushResult(lr)
         setBatchProgress((p) => ({ ...p, [i]: 'done' }))
-      } catch {
+      } catch (e) {
+        const lr: LabelResult = {
+          id: newId(),
+          filename: file.name,
+          imgSrc: batchThumbs[i] ?? '',
+          appData,
+          result: null,
+          error: e instanceof Error ? e.message : 'Verification failed',
+        }
+        pushResult(lr)
         setBatchProgress((p) => ({ ...p, [i]: 'error' }))
       }
     })
@@ -372,9 +381,10 @@ export default function Page() {
   const counts = results.reduce(
     (acc, r) => {
       if (r.result) acc[r.result.overallStatus] = (acc[r.result.overallStatus] ?? 0) + 1
+      else if (r.error) acc.error = (acc.error ?? 0) + 1
       return acc
     },
-    {} as Record<OverallStatus, number>,
+    {} as Record<OverallStatus | 'error', number>,
   )
 
   const batchDone = Object.values(batchProgress).filter((s) => s === 'done' || s === 'error').length
@@ -551,6 +561,7 @@ export default function Page() {
                   { label: 'Approved', value: counts.pass ?? 0, cls: styles.numPass },
                   { label: 'Review needed', value: (counts.warn ?? 0) + (counts.unreadable ?? 0), cls: styles.numWarn },
                   { label: 'Rejected', value: counts.fail ?? 0, cls: styles.numFail },
+                  ...(counts.error ? [{ label: 'Errors', value: counts.error, cls: styles.numFail }] : []),
                 ].map((s) => (
                   <div key={s.label} className={styles.stat}>
                     <span className={`${styles.statNum} ${s.cls}`}>{s.value}</span>
