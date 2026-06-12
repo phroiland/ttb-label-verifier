@@ -6,13 +6,32 @@ AI-powered alcohol label compliance verification for TTB (Alcohol and Tobacco Ta
 
 ## Screenshots
 
-| Verification form | Deterministic warning diff |
-|---|---|
-| ![Verification form](docs/ttb-screenshot-form.png) | ![Warning diff catching modified statutory text](docs/ttb-screenshot-diff.png) |
-
-| Batch upload | Batch results |
-|---|---|
-| ![Batch upload](docs/ttb-screenshot-batch.png) | ![Batch results](docs/ttb-screenshot-batch2.png) |
+<table>
+  <tr>
+    <td align="center"><b>Verification form</b><br>Agent view: upload + COLA application data</td>
+    <td align="center"><b>Deterministic warning diff</b><br>Word-level diff catching modified statutory text</td>
+  </tr>
+  <tr>
+    <td><img src="docs/ttb-screenshot-form.png" alt="Verification form" width="420"></td>
+    <td><img src="docs/ttb-screenshot-diff.png" alt="Deterministic warning diff" width="420"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Batch upload</b><br>Up to 300 labels with per-label CSV data</td>
+    <td align="center"><b>Batch results</b><br>Summary stats and per-label outcomes</td>
+  </tr>
+  <tr>
+    <td><img src="docs/ttb-screenshot-batch.png" alt="Batch upload" width="420"></td>
+    <td><img src="docs/ttb-screenshot-batch2.png" alt="Batch results" width="420"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Applicant pre-check</b><br>Public pre-submission screening form</td>
+    <td align="center"><b>Pre-check result</b><br>Verdict, diff, and copy-paste fix guidance</td>
+  </tr>
+  <tr>
+    <td><img src="docs/ttb-screenshot-precheck.png" alt="Applicant pre-check form" width="420"></td>
+    <td><img src="docs/ttb-screenshot-precheck-result.png" alt="Pre-check result with fix guidance" width="420"></td>
+  </tr>
+</table>
 
 ## What it does
 
@@ -21,14 +40,17 @@ Upload a label image and enter application data (brand name, ABV, net contents, 
 **Key features:**
 
 - Single label verification with full field-by-field breakdown
+- **Applicant pre-check mode** (`/precheck`) — the same verification engine reframed as a pre-submission screening tool for distilleries and importers, with coaching-style output, a copy-paste block for the required warning text, and explicit advisory disclaimers. Every error caught before submission is a rejection cycle TTB never processes.
 - Batch upload — up to 300 labels processed concurrently (5 at a time), with optional per-label application data via CSV import
 - **Deterministic government warning check** — the AI transcribes the warning verbatim; exactness is judged by code with a word-level diff against the statutory text (27 CFR Part 16), rendered visually so agents see exactly which words deviate
 - Fuzzy/semantic matching with judgment for other fields — case differences become warnings, not hard failures
 - **Image quality gate** — blurry, glared, or angled photos return "Image unreadable" instead of a guessed extraction
-- **Per-label timing** displayed on every result (target: under 5 seconds)
+- **Per-label timing** displayed on every result — model selection (claude-haiku-4-5) is tuned to the 5-second requirement; the deterministic warning layer is what makes the faster, cheaper model safe to use
 - **CSV export and PDF audit report** — one page per label with thumbnail, field table, and status, for case files and document retention
 - Pass / Review needed / Rejected / Unreadable outcomes per label
+- **Per-label error handling** — if a single API call fails (rate limit, network), that label appears in Results with its error message rather than silently vanishing from a batch run; a dedicated "Errors" count appears in the summary bar only when relevant
 - Clean, accessible UI designed for non-technical users — USWDS-inspired federal styling with an explicit unofficial-prototype banner
+- **API hardening** — per-IP rate limiting and request size caps on the verification endpoint (in-memory for the prototype; a production deployment would use a durable store like Redis)
 
 ## Requirements traceability
 
@@ -92,6 +114,23 @@ npm run dev
 
 Open http://localhost:3000.
 
+## Run with Docker
+
+```bash
+docker compose up --build
+# reads ANTHROPIC_API_KEY from .env.local
+```
+
+Or without compose:
+
+```bash
+docker build -t ttb-label-verifier .
+docker run -p 3000:3000 -e ANTHROPIC_API_KEY=your_key ttb-label-verifier
+```
+Open http://localhost:3000.
+
+The image is a multi-stage build producing a minimal Alpine runtime (~150 MB) running Next.js standalone output as a non-root user. Containerization reflects how this prototype would realistically move toward production in TTB's Azure environment — reproducible builds, no host Node dependency, deployable to any container platform.
+
 ## Deploy to Vercel (recommended)
 
 1. Push this repo to GitHub
@@ -126,7 +165,7 @@ test-labels/           # Generated test suite + expected-results matrix
 
 1. User uploads image(s) + fills in application data fields
 2. Frontend converts image to base64 and sends to `/api/verify`
-3. API route calls claude-opus-4-5 with the image + a structured compliance prompt
+3. API route calls claude-haiku-4-5 with the image + a structured compliance prompt
 4. Claude extracts each field; for the government warning it transcribes verbatim only
 5. Server code runs the deterministic warning comparison, computes the word diff, and recomputes the overall status
 6. Result JSON (overall status + per-field checks + warning diff + timing) is returned and rendered
@@ -139,7 +178,7 @@ test-labels/           # Generated test suite + expected-results matrix
 
 **Tools used:**
 
-- claude-opus-4-5 (Anthropic) — vision model for label extraction and semantic field comparison
+- claude-haiku-4-5 (Anthropic) — vision model for label extraction and semantic field comparison
 - Next.js 14 — React framework with API routes for server-side key management
 - TypeScript — type safety across frontend and backend
 - jsPDF — client-side PDF report generation
@@ -165,13 +204,17 @@ test-labels/           # Generated test suite + expected-results matrix
 
 **Fuzzy matching is Claude's job — except the warning.** For most fields the prompt instructs the model to apply judgment, the same way a human agent does. The government warning is the exception: extraction by AI, judgment by code (see above).
 
+**Model choice: Haiku over Sonnet.** Testing across the full test-label suite found `claude-haiku-4-5` keeps verification under the 5-second target (vs. 6-13s with Sonnet) at acceptable accuracy cost: in one case (`05-warn-brand-case.png`), Haiku approved a label with a minor brand-name formatting difference ("Old Tom's Distillery" vs. "OLD TOM DISTILLERY") that Sonnet correctly flagged for review. This is a real trade-off, but a bounded one — it affects only the "review needed" tier for cosmetic discrepancies, never a hard pass/fail. The field with zero tolerance, the government warning, is checked by deterministic code regardless of which vision model extracts the text, so the compliance-critical path is unaffected by this choice. If stricter fuzzy-matching on minor formatting differences becomes a priority over latency, swapping back to `claude-sonnet-4-6` in `src/app/api/verify/route.ts` is a one-line change.
+
 **Client-side exports.** CSV and PDF are generated entirely in the browser — no server storage, no retention surface, and the export works even if the agent is offline after verification.
 
 **Known limitations / future work:**
 
 - Bold-type detection on the warning prefix
+- Field checklist is currently uniform across beverage types; TTB requirements vary by category (e.g. sulfite declarations for wine). A production version would branch the verification checklist on the "Beverage Type" field.
 - Integration with COLA system (requires TTB authorization — out of scope for prototype)
 - Authentication layer before any production deployment
+- Rate limiting is in-memory per serverless instance (best-effort); production would require a durable store and authentication
 
 ## Tests
 
