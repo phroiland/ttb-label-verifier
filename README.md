@@ -12,7 +12,7 @@ AI-powered alcohol label compliance verification for TTB (Alcohol and Tobacco Ta
 
 | Batch upload | Batch results |
 |---|---|
-| ![Batch upload](docs/ttb-screenshot-batch.png) | ![Batch results](docs/ttb-screenshot-batch2.png) |
+| ![Batch upload](docs/ttb-screenshot-batch-csv.png) | ![Batch results](docs/ttb-screenshot-batch2.png) |
 
 ## What it does
 
