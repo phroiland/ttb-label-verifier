@@ -6,11 +6,32 @@ AI-powered alcohol label compliance verification for TTB (Alcohol and Tobacco Ta
 
 ## Screenshots
 
-<img src="docs/ttb-screenshot-form.png" alt="Verification form" width="420"> <img src="docs/ttb-screenshot-diff.png" alt="Deterministic warning diff" width="420">
-
-<img src="docs/ttb-screenshot-batch.png" alt="Batch upload" width="420"> <img src="docs/ttb-screenshot-batch2.png" alt="Batch results" width="420">
-
-<img src="docs/ttb-screenshot-precheck.png" alt="Applicant pre-check form" width="420"> <img src="docs/ttb-screenshot-precheck-result.png" alt="Pre-check result with fix guidance" width="420">
+<table>
+  <tr>
+    <td align="center"><b>Verification form</b><br>Agent view: upload + COLA application data</td>
+    <td align="center"><b>Deterministic warning diff</b><br>Word-level diff catching modified statutory text</td>
+  </tr>
+  <tr>
+    <td><img src="docs/ttb-screenshot-form.png" alt="Verification form" width="420"></td>
+    <td><img src="docs/ttb-screenshot-diff.png" alt="Deterministic warning diff" width="420"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Batch upload</b><br>Up to 300 labels with per-label CSV data</td>
+    <td align="center"><b>Batch results</b><br>Summary stats and per-label outcomes</td>
+  </tr>
+  <tr>
+    <td><img src="docs/ttb-screenshot-batch.png" alt="Batch upload" width="420"></td>
+    <td><img src="docs/ttb-screenshot-batch2.png" alt="Batch results" width="420"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Applicant pre-check</b><br>Public pre-submission screening form</td>
+    <td align="center"><b>Pre-check result</b><br>Verdict, diff, and copy-paste fix guidance</td>
+  </tr>
+  <tr>
+    <td><img src="docs/ttb-screenshot-precheck.png" alt="Applicant pre-check form" width="420"></td>
+    <td><img src="docs/ttb-screenshot-precheck-result.png" alt="Pre-check result with fix guidance" width="420"></td>
+  </tr>
+</table>
 
 ## What it does
 
