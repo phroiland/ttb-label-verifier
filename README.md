@@ -172,6 +172,7 @@ test-labels/           # Generated test suite + expected-results matrix
 **Known limitations / future work:**
 
 - Bold-type detection on the warning prefix
+- Field checklist is currently uniform across beverage types; TTB requirements vary by category (e.g. sulfite declarations for wine). A production version would branch the verification checklist on the "Beverage Type" field.
 - Integration with COLA system (requires TTB authorization — out of scope for prototype)
 - Authentication layer before any production deployment
 
