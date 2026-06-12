@@ -165,6 +165,8 @@ test-labels/           # Generated test suite + expected-results matrix
 
 **Fuzzy matching is Claude's job — except the warning.** For most fields the prompt instructs the model to apply judgment, the same way a human agent does. The government warning is the exception: extraction by AI, judgment by code (see above).
 
+**Model choice: Haiku over Sonnet.** Testing across the full test-label suite found `claude-haiku-4-5` keeps verification under the 5-second target (vs. 6-13s with Sonnet) at acceptable accuracy cost: in one case (`05-warn-brand-case.png`), Haiku approved a label with a minor brand-name formatting difference ("Old Tom's Distillery" vs. "OLD TOM DISTILLERY") that Sonnet correctly flagged for review. This is a real trade-off, but a bounded one — it affects only the "review needed" tier for cosmetic discrepancies, never a hard pass/fail. The field with zero tolerance, the government warning, is checked by deterministic code regardless of which vision model extracts the text, so the compliance-critical path is unaffected by this choice. If stricter fuzzy-matching on minor formatting differences becomes a priority over latency, swapping back to `claude-sonnet-4-6` in `src/app/api/verify/route.ts` is a one-line change.
+
 **Client-side exports.** CSV and PDF are generated entirely in the browser — no server storage, no retention surface, and the export works even if the agent is offline after verification.
 
 **Known limitations / future work:**
