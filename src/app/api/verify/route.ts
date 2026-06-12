@@ -108,7 +108,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ result })
   } catch (err) {
     console.error('Verify error:', err)
-    const message = err instanceof Error ? err.message : 'Verification failed'
+    const raw = err instanceof Error ? err.message : ''
+    const message = raw.includes('authentication')
+      ? 'Verification service is not configured correctly (API key). Contact your administrator.'
+      : raw.includes('rate_limit')
+      ? 'Too many requests at once — wait a moment and retry this label.'
+      : raw.includes('overloaded')
+      ? 'Verification service is temporarily busy — retry in a few seconds.'
+      : 'Verification failed — please retry. If this persists, contact your administrator.'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
