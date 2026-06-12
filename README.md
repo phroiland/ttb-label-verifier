@@ -114,6 +114,23 @@ npm run dev
 
 Open http://localhost:3000.
 
+## Run with Docker
+
+```bash
+docker compose up --build
+# reads ANTHROPIC_API_KEY from .env.local
+```
+
+Or without compose:
+
+```bash
+docker build -t ttb-label-verifier .
+docker run -p 3000:3000 -e ANTHROPIC_API_KEY=your_key ttb-label-verifier
+```
+Open http://localhost:3000.
+
+The image is a multi-stage build producing a minimal Alpine runtime (~150 MB) running Next.js standalone output as a non-root user. Containerization reflects how this prototype would realistically move toward production in TTB's Azure environment — reproducible builds, no host Node dependency, deployable to any container platform.
+
 ## Deploy to Vercel (recommended)
 
 1. Push this repo to GitHub
