@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { Public_Sans } from 'next/font/google'
-import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 
 const publicSans = Public_Sans({
@@ -54,12 +53,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </p>
           </div>
         </footer>
-
-        <SpeedInsights />
-        <Script
-          src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-          strategy="lazyOnload"
-        />
       </body>
     </html>
   )
