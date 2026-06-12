@@ -57,6 +57,24 @@ export async function POST(req: NextRequest) {
     const clean = raw.replace(/```json|```/g, '').trim()
     const result: VerificationResult = JSON.parse(clean)
 
+    // ── Fill application values server-side ─────────────────────────────────
+    // The model no longer echoes application data back (saves output tokens →
+    // faster responses); we already have it and attach it here.
+    const fieldToValue = (field: string): string => {
+      const f = field.toLowerCase()
+      if (f.includes('warning')) return 'Statutory warning text (27 CFR Part 16)'
+      if (f.includes('brand')) return appData.brand
+      if (f.includes('class') || f.includes('type')) return appData.classType
+      if (f.includes('alcohol') || f.includes('abv')) return appData.abv
+      if (f.includes('net')) return appData.net
+      if (f.includes('producer') || f.includes('bottler')) return appData.producer
+      if (f.includes('origin') || f.includes('country')) return appData.origin
+      return ''
+    }
+    result.checks.forEach((c) => {
+      c.applicationValue = c.applicationValue || fieldToValue(c.field) || '(not provided)'
+    })
+
     // ── Deterministic government warning check ──────────────────────────────
     // The model only TRANSCRIBES the warning; exactness is judged here in code.
     // Skipped if the image was unreadable.

@@ -31,17 +31,16 @@ MATCHING RULES (for all fields EXCEPT the government warning):
 GOVERNMENT WARNING — EXTRACTION ONLY, DO NOT JUDGE:
 For the "Government warning statement" check, your ONLY job is transcription. Set labelValue to the warning text EXACTLY as printed on the label — verbatim, character for character, preserving the original capitalization, punctuation, and numbering. Do not correct it, do not normalize it, do not omit anything. If no warning appears on the label, set labelValue to null. Set status to "pass" and leave note empty — the exactness judgment is performed separately by deterministic code, not by you.
 
-Respond ONLY with valid JSON, no markdown fences, no preamble, no trailing text:
+Respond ONLY with valid JSON, no markdown fences, no preamble, no trailing text. Keep it COMPACT — overallSummary one short sentence, notes only when status is not "pass" and at most ~12 words. Do NOT repeat the application data back; output only what you read from the label:
 {
   "overallStatus": "pass" | "warn" | "fail" | "unreadable",
-  "overallSummary": "One sentence for the compliance agent explaining the outcome",
+  "overallSummary": "One short sentence",
   "checks": [
     {
       "field": "Brand name",
       "status": "pass" | "warn" | "fail" | "missing",
-      "applicationValue": "value from application data",
-      "labelValue": "what was extracted from the label image, or null if not found",
-      "note": "brief explanation (required if status is warn/fail/missing)"
+      "labelValue": "text extracted from the label, or null if not found",
+      "note": "only if status is warn/fail/missing; brief"
     }
   ]
 }
