@@ -91,7 +91,7 @@ The [`test-labels/`](test-labels/) folder contains seven generated labels coveri
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - An [Anthropic API key](https://console.anthropic.com/)
 
 ### Steps
