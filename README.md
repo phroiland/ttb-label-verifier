@@ -63,7 +63,7 @@ Every design decision maps to something a stakeholder said in discovery:
 | **Sarah / Janet:** "Importers dump 200, 300 label applications on us at once… handle batch uploads" | Batch tab accepts up to 300 images with live per-thumbnail progress |
 | **Dave:** "'STONE'S THROW' vs 'Stone's Throw'… You need judgment" | Non-warning fields use semantic matching: case/punctuation differences are flagged for review, not auto-rejected |
 | **Jenny:** "The warning has to be exact… 'Government Warning' in title case instead of all caps. Rejected." | Warning check is deterministic code, not AI judgment: word-for-word comparison plus an explicit all-caps prefix check, with a visual diff. Test label #2 reproduces Jenny's exact title-case catch |
-| **Jenny:** "Labels photographed at weird angles, or the lighting is bad, or there's glare" | Image quality gate: the model is instructed to return "unreadable" rather than guess; agents are told to request a better image |
+| **Jenny:** "Labels photographed at weird angles, or the lighting is bad, or there's glare" | The vision model tolerates moderately imperfect images that slow humans down; an image-quality gate returns "unreadable" rather than a guessed extraction only when reading would be unreliable |
 | **Marcus:** "Our network blocks outbound traffic to a lot of domains" | Single external dependency (Anthropic API over HTTPS), documented below; no scattered third-party ML endpoints. A production deployment would need `api.anthropic.com` allowlisted — one firewall rule |
 | **Marcus:** "PII considerations, document retention policies" | No image or result storage server-side; PDF/CSV export gives agents a local audit artifact compatible with existing retention processes |
 
@@ -144,21 +144,34 @@ That's it — Vercel handles the rest. The API key stays server-side and is neve
 ## Architecture
 
 ```
+
 src/
   app/
-    page.tsx           # Main React UI (tabs: single / batch / results)
+    page.tsx           # Agent UI (tabs: single / batch / results)
     page.module.css    # Scoped styles
-    globals.css        # CSS variables + resets
-    layout.tsx         # Root layout + jsPDF loader
+    globals.css        # CSS variables + federal design tokens
+    layout.tsx         # Root layout (banner, masthead, footer)
+    precheck/
+      page.tsx         # Applicant pre-check mode (coaching-framed output)
+      precheck.module.css
     api/
       verify/
-        route.ts       # POST /api/verify — Claude vision extraction + deterministic warning check
+        route.ts       # POST /api/verify — extraction + deterministic warning check + rate limiting
   lib/
     prompt.ts          # Verification prompt (extraction rules, image quality gate)
     warning-check.ts   # Deterministic statutory warning comparison + LCS word diff
-    export.ts          # CSV export + multi-page PDF audit report (jsPDF)
+    warning-check.test.ts
+    csv-import.ts      # Per-label batch application data (CSV parsing + merging)
+    csv-import.test.ts
+    export.ts          # CSV export + multi-page PDF audit report (jsPDF, npm-bundled)
+    client.ts          # Shared browser-side fetch/file helpers
   types.ts             # Shared TypeScript types
-test-labels/           # Generated test suite + expected-results matrix
+test-labels/           # Generated test suite + expected-results matrix + sample CSV
+docs/                  # README Sccreenshots
+Dockerfile             # Multi-stage build → minimal Alpine runtime, non-root
+docker-compose.yml
+vitest.config.ts
+
 ```
 
 **Data flow:**
@@ -181,7 +194,7 @@ test-labels/           # Generated test suite + expected-results matrix
 **Tools used:**
 
 - claude-haiku-4-5 (Anthropic) — vision model for label extraction and semantic field comparison
-- Next.js 14 — React framework with API routes for server-side key management
+- Next.js 15 — React framework with API routes for server-side key management
 - TypeScript — type safety across frontend and backend
 - jsPDF — client-side PDF report generation
 - Vercel — deployment platform
