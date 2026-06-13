@@ -61,12 +61,9 @@ export function exportCSV(results: LabelResult[]) {
 
 // ── PDF Export ────────────────────────────────────────────────────────────────
 
-// Uses jsPDF loaded via CDN script tag in layout — accessed via window.jspdf
-declare global {
-  interface Window {
-    jspdf: { jsPDF: new (opts?: object) => jsPDFInstance }
-  }
-}
+// jsPDF is bundled via npm (no runtime CDN dependency — see Marcus's firewall
+// concern: the only external domain this app contacts is api.anthropic.com).
+// Dynamically imported so the ~300KB library loads only when an export is run.
 
 interface jsPDFInstance {
   internal: { pageSize: { getWidth: () => number; getHeight: () => number } }
@@ -107,11 +104,8 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 export async function exportPDF(results: LabelResult[]) {
-  if (!window.jspdf) {
-    alert('PDF library not loaded yet — please try again in a moment.')
-    return
-  }
-  const { jsPDF } = window.jspdf
+  const mod = await import('jspdf')
+  const jsPDF = mod.jsPDF as unknown as new (opts?: object) => jsPDFInstance
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
 
   const pw = doc.internal.pageSize.getWidth()   // 210

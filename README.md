@@ -172,6 +172,8 @@ test-labels/           # Generated test suite + expected-results matrix
 
 **Security:** The Anthropic API key lives in `process.env.ANTHROPIC_API_KEY` on the server. It is never sent to the browser. Image data travels from browser → Next.js API route → Anthropic, and is not stored anywhere.
 
+**Network egress:** The application's only runtime external dependency is `api.anthropic.com` over HTTPS — including the PDF export library, which is npm-bundled rather than CDN-loaded, specifically so no feature silently fails behind a restrictive government firewall (the failure mode Marcus described from the prior vendor pilot).
+
 ## Approach, tools, and assumptions
 
 **Approach:** Split the problem by what each tool is good at. The AI vision model handles perception (reading messy real-world label images) and human-like judgment (is "Old Tom's Distillery" the same brand as "OLD TOM DISTILLERY"?). Deterministic code handles compliance rules that have exact statutory answers (the government warning). This hybrid keeps the system explainable where it must be and flexible where it should be.
